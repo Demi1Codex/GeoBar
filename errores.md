@@ -7,6 +7,9 @@ Render ejecutaba `expo start` (script `start` en package.json) en lugar de `node
 **¿Cómo se solucionó?**
 Se cambió el script `"start"` de `package.json` a `"node server.js"` y se movió `expo start` al script `"expo"`. Se agregó un `Procfile` con `web: node server.js` para que Render use el comando correcto.
 
+## Solución: Panel de control Python para servidor remoto
+No hay terminal interactiva en Render. Se creó `server_cli.py` que se ejecuta localmente y se conecta al servidor (local o Render) vía HTTP. Comandos: `reset`, `status`, `bars`, `connect`.
+
 ## Error: IP 0.0.0.0 en Render no funciona para conexión desde la app
 **¿Qué pasó?**
 Render muestra `http://0.0.0.0:10000` como bind address local. Esa dirección solo sirve para el servidor internamente, no es una URL pública accesible desde la app.

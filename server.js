@@ -39,6 +39,28 @@ app.post('/vote', (req, res) => {
     }
 });
 
+app.get('/status', (req, res) => {
+    const summary = bars.map(b => ({
+        name: b.name,
+        votes: b.votes,
+        total: b.votes.prendido + b.votes.vengan + b.votes.paja
+    }));
+    res.json(summary);
+});
+
+app.post('/reset-votes', (req, res) => {
+    bars = bars.map(bar => ({ ...bar, votes: { prendido: 0, vengan: 0, paja: 0 }, lastUpdated: null }));
+    console.log(" Votos limpiados manualmente.");
+    res.json({ success: true, message: "Votos limpiados" });
+});
+
+// AUTO-RESET CADA 3 HORAS
+const THREE_HOURS = 3 * 60 * 60 * 1000;
+setInterval(() => {
+    bars = bars.map(bar => ({ ...bar, votes: { prendido: 0, vengan: 0, paja: 0 }, lastUpdated: null }));
+    console.log(" Votos auto-limpiados (cada 3 horas)");
+}, THREE_HOURS);
+
 app.post('/removevote', (req, res) => {
     const { barId, type } = req.body;
     const bar = bars.find(b => b.id === barId);

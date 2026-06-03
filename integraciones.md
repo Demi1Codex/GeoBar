@@ -28,3 +28,7 @@
 - Sistema de conexión dinámica: ahora acepta IP local (ej: 192.168.1.50) o URL completa (ej: https://geobar.onrender.com) [COMPLETADO]
 - Migración de AsyncStorage de @server_ip a @server_url para soportar URLs completas [COMPLETADO]
 - Despliegue del servidor Express en Render.com con Procfile [COMPLETADO]
+- Endpoint POST /reset-votes para limpieza manual de votos [COMPLETADO]
+- Endpoint GET /status con resumen de votos [COMPLETADO]
+- Auto-reset de votos cada 3 horas en el servidor [COMPLETADO]
+- Panel de control Python (server_cli.py) con comandos reset, status, bars, connect [COMPLETADO]
