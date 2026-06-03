@@ -1,5 +1,19 @@
 # Registro de Errores - GeoBar
 
+## Error: ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING en Render
+**¿Qué pasó?**
+Render ejecutaba `expo start` (script `start` en package.json) en lugar de `node server.js`. Expo cargaba sus módulos `.ts` y Node.js 22+ fallaba porque su sistema de type stripping no funciona dentro de `node_modules`.
+
+**¿Cómo se solucionó?**
+Se cambió el script `"start"` de `package.json` a `"node server.js"` y se movió `expo start` al script `"expo"`. Se agregó un `Procfile` con `web: node server.js` para que Render use el comando correcto.
+
+## Error: IP 0.0.0.0 en Render no funciona para conexión desde la app
+**¿Qué pasó?**
+Render muestra `http://0.0.0.0:10000` como bind address local. Esa dirección solo sirve para el servidor internamente, no es una URL pública accesible desde la app.
+
+**¿Cómo se solucionó?**
+Se modificó el sistema de conexión en `App.js` para aceptar URLs completas (ej: `https://geobar.onrender.com`) además de IPs locales. Ahora el input detecta automáticamente si es una IP (usa `http://IP:3000`) o una URL completa (la usa directamente). Se migró la clave de AsyncStorage de `@server_ip` a `@server_url` con soporte de migración automática.
+
 ## Error: BUILD FAILED (Error en la instalación de APK)
 **¿Qué pasó?**
 Falla en el autolinking y rutas del SDK durante el proceso automático de Expo.

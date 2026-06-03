@@ -169,7 +169,7 @@ export default function App() {
   const [isSimulated, setIsSimulated] = useState(true);
   const [nearbyIds, setNearbyIds] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
-  const [serverIp, setServerIp] = useState("");
+  const [serverUrl, setServerUrl] = useState("");
   const [isNetworkModalVisible, setIsNetworkModalVisible] = useState(false);
   const [tempIp, setTempIp] = useState("");
   const [connectionStatus, setConnectionStatus] = useState('unknown');
@@ -180,6 +180,15 @@ export default function App() {
   const webViewRef = useRef(null);
   const confirmingVoteRef = useRef(false);
 
+  const normalizeUrl = useCallback((input) => {
+    if (!input) return "";
+    input = input.trim();
+    if (input.startsWith("http://") || input.startsWith("https://")) {
+      return input;
+    }
+    return `http://${input}:3000`;
+  }, []);
+
   const nearbyBars = useMemo(() => bars.filter(b => nearbyIds.includes(b.id)), [bars, nearbyIds]);
   const selectedBar = useMemo(() => bars.find(b => b.id === selectedId), [bars, selectedId]);
 
@@ -188,11 +197,20 @@ export default function App() {
 
     (async () => {
       try {
-        const savedIp = await AsyncStorage.getItem('@server_ip');
-        if (savedIp) {
-          setServerIp(savedIp);
-          setTempIp(savedIp);
-          fetchBars(savedIp);
+        const saved = await AsyncStorage.getItem('@server_url');
+        if (saved) {
+          setServerUrl(saved);
+          setTempIp(saved);
+          fetchBars(saved);
+        } else {
+          const oldIp = await AsyncStorage.getItem('@server_ip');
+          if (oldIp) {
+            await AsyncStorage.setItem('@server_url', oldIp);
+            await AsyncStorage.removeItem('@server_ip');
+            setServerUrl(oldIp);
+            setTempIp(oldIp);
+            fetchBars(oldIp);
+          }
         }
 
         const savedVotes = await AsyncStorage.getItem('@user_votes');
@@ -233,10 +251,11 @@ export default function App() {
     };
   }, []);
 
-  const fetchBars = async (targetIp) => {
-    if (!targetIp) return;
+  const fetchBars = async (target) => {
+    const url = normalizeUrl(target);
+    if (!url) return;
     try {
-      const response = await fetch(`http://${targetIp}:3000/bars`);
+      const response = await fetch(`${url}/bars`);
       if (response.ok) {
         const data = await response.json();
         setBars(data);
@@ -246,8 +265,9 @@ export default function App() {
     }
   };
 
-  const testConnection = async (ipToTest) => {
-    if (!ipToTest) {
+  const testConnection = async (input) => {
+    const url = normalizeUrl(input);
+    if (!url) {
       setConnectionStatus('unknown');
       return;
     }
@@ -256,7 +276,7 @@ export default function App() {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
-      const response = await fetch(`http://${ipToTest}:3000/bars`, {
+      const response = await fetch(`${url}/bars`, {
         method: 'GET',
         signal: controller.signal
       });
@@ -291,10 +311,9 @@ export default function App() {
       });
     }, 60000);
 
-    // Sincronización cada 5 segundos con el servidor si hay IP configurada
     const syncInterval = setInterval(() => {
-      if (serverIp) {
-        fetchBars(serverIp);
+      if (serverUrl) {
+        fetchBars(serverUrl);
       }
     }, 5000);
 
@@ -302,7 +321,7 @@ export default function App() {
       clearInterval(checkInterval);
       clearInterval(syncInterval);
     };
-  }, [serverIp]);
+  }, [serverUrl]);
 
   const lastInjectedBars = useRef("");
   useEffect(() => {
@@ -365,16 +384,17 @@ export default function App() {
       return bar;
     }));
 
-    if (serverIp) {
+    const baseUrl = normalizeUrl(serverUrl);
+    if (baseUrl) {
       try {
         if (previousVote) {
-          await fetch(`http://${serverIp}:3000/removevote`, {
+          await fetch(`${baseUrl}/removevote`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ barId: selectedId, type: previousVote })
           });
         }
-        const response = await fetch(`http://${serverIp}:3000/vote`, {
+        const response = await fetch(`${baseUrl}/vote`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ barId: selectedId, type })
@@ -389,7 +409,7 @@ export default function App() {
     setVoteCountdown(0);
     setIsSyncing(false);
     confirmingVoteRef.current = false;
-  }, [pendingVote, selectedId, serverIp, userVotes]);
+  }, [pendingVote, selectedId, serverUrl, userVotes]);
 
   const cancelVote = useCallback(() => {
     setPendingVote(null);
@@ -449,7 +469,7 @@ export default function App() {
             <Text style={styles.brandText}>GEOBAR</Text>
             <TouchableOpacity
               onLongPress={() => {
-                setTempIp(serverIp);
+                setTempIp(serverUrl);
                 setIsNetworkModalVisible(true);
               }}
               delayLongPress={2000}
@@ -458,7 +478,7 @@ export default function App() {
               <Text style={styles.cityText}>SANTIAGO RM</Text>
               {isSimulated && <View style={styles.simBadge}><Text style={styles.simText}>SIMULACIÓN</Text></View>}
               {isSyncing && <ActivityIndicator size="small" color={COLORS.PRENDIDO} style={{ marginLeft: 5 }} />}
-              {serverIp ? <Globe size={10} color={COLORS.PRENDIDO} style={{ marginLeft: 5 }} /> : null}
+              {serverUrl ? <Globe size={10} color={COLORS.PRENDIDO} style={{ marginLeft: 5 }} /> : null}
             </TouchableOpacity>
           </View>
           <TouchableOpacity
@@ -597,19 +617,19 @@ export default function App() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Configuración de Red</Text>
-            <Text style={styles.modalSubtitle}>Ingresa la IP de tu servidor local para conectar en modo desarrollo.</Text>
+            <Text style={styles.modalSubtitle}>IP local (ej: 192.168.1.50) o URL del servidor (ej: https://tuservidor.onrender.com).</Text>
 
             <View style={styles.inputContainer}>
               <TextInput
                 style={styles.ipInput}
-                placeholder="Ej: 192.168.1.50"
+                placeholder="IP o URL del servidor"
                 placeholderTextColor="rgba(255,255,255,0.3)"
                 value={tempIp}
                 onChangeText={(text) => {
                   setTempIp(text);
                   setConnectionStatus('unknown');
                 }}
-                keyboardType="numeric"
+                keyboardType="url"
               />
               <TouchableOpacity
                 style={[styles.testBtn, isChecking && { opacity: 0.5 }]}
@@ -649,12 +669,12 @@ export default function App() {
                 style={[styles.modalBtn, styles.saveBtn]}
                 onPress={async () => {
                   try {
-                    await AsyncStorage.setItem('@server_ip', tempIp);
-                    setServerIp(tempIp);
+                    const displayUrl = normalizeUrl(tempIp) || tempIp || "ninguna";
+                    await AsyncStorage.setItem('@server_url', tempIp);
+                    setServerUrl(tempIp);
                     setIsNetworkModalVisible(false);
-                    // Cargar bares inmediatamente al cambiar IP
                     if (tempIp) fetchBars(tempIp);
-                    Alert.alert("Conexión", tempIp ? `Sincronizando con http://${tempIp}:3000` : "Modo local (sin sincronización)");
+                    Alert.alert("Conexión", tempIp ? `Sincronizando con ${displayUrl}` : "Modo local (sin sincronización)");
                   } catch (e) {
                     Alert.alert("Error", "No se pudo guardar la configuración.");
                   }

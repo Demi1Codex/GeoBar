@@ -25,3 +25,6 @@
 - Countdown de 3 segundos antes de confirmar el voto (con botón Cancelar) [COMPLETADO]
 - Fix: Uso de ref `confirmingVoteRef` para prevenir clicks múltiples durante el countdown [COMPLETADO]
 - Instalación de APK release en dispositivo con cambios del countdown [COMPLETADO]
+- Sistema de conexión dinámica: ahora acepta IP local (ej: 192.168.1.50) o URL completa (ej: https://geobar.onrender.com) [COMPLETADO]
+- Migración de AsyncStorage de @server_ip a @server_url para soportar URLs completas [COMPLETADO]
+- Despliegue del servidor Express en Render.com con Procfile [COMPLETADO]
