@@ -311,9 +311,26 @@ export default function App() {
       });
     }, 60000);
 
-    const syncInterval = setInterval(() => {
+    const syncInterval = setInterval(async () => {
       if (serverUrl) {
         fetchBars(serverUrl);
+        try {
+          const base = normalizeUrl(serverUrl);
+          if (base) {
+            const resetResp = await fetch(`${base}/user-reset-timestamp`);
+            if (resetResp.ok) {
+              const { timestamp } = await resetResp.json();
+              const storedReset = await AsyncStorage.getItem('@user_reset_timestamp');
+              if (storedReset && timestamp.toString() !== storedReset) {
+                await AsyncStorage.removeItem('@user_votes');
+                await AsyncStorage.setItem('@user_reset_timestamp', timestamp.toString());
+                setUserVotes({});
+              } else if (!storedReset) {
+                await AsyncStorage.setItem('@user_reset_timestamp', timestamp.toString());
+              }
+            }
+          }
+        } catch (e) {}
       }
     }, 5000);
 

@@ -66,6 +66,18 @@ def cmd_status(base_url):
         print(f"  Error de conexion: {e}")
 
 
+def cmd_user_reset(base_url):
+    try:
+        r = requests.post(f"{base_url}/user-reset", timeout=10)
+        if r.ok:
+            data = r.json()
+            print(f"  Reset de usuarios ejecutado. Las apps limpiaran sus votos locales.")
+        else:
+            print(f"  Error: {r.status_code} - {r.text}")
+    except Exception as e:
+        print(f"  Error de conexion: {e}")
+
+
 def cmd_bars(base_url):
     try:
         r = requests.get(f"{base_url}/bars", timeout=10)
@@ -85,12 +97,13 @@ def cmd_bars(base_url):
 def print_help():
     print("""
   Comandos disponibles:
-    reset      Limpiar todos los votos
-    status     Mostrar resumen de votos
-    bars       Listar todos los bares
-    connect    Cambiar la URL del servidor
-    help       Mostrar esta ayuda
-    exit       Salir del panel
+    reset         Limpiar todos los votos
+    user-reset    Resetear usuarios (pueden votar de nuevo en bares ya votados)
+    status        Mostrar resumen de votos
+    bars          Listar todos los bares
+    connect       Cambiar la URL del servidor
+    help          Mostrar esta ayuda
+    exit          Salir del panel
   """)
 
 
@@ -134,6 +147,8 @@ def main():
             break
         elif cmd == "reset":
             cmd_reset(base_url)
+        elif cmd in ("user-reset", "userreset"):
+            cmd_user_reset(base_url)
         elif cmd == "status":
             cmd_status(base_url)
         elif cmd == "bars":

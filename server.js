@@ -54,6 +54,19 @@ app.post('/reset-votes', (req, res) => {
     res.json({ success: true, message: "Votos limpiados" });
 });
 
+// RESET DE USUARIOS (permite votar de nuevo en bares ya votados)
+let userResetTimestamp = Date.now();
+
+app.post('/user-reset', (req, res) => {
+    userResetTimestamp = Date.now();
+    console.log(" Reset de usuarios ejecutado. Las apps limpiaran sus votos locales.");
+    res.json({ success: true, timestamp: userResetTimestamp, message: "Reset de usuarios ejecutado" });
+});
+
+app.get('/user-reset-timestamp', (req, res) => {
+    res.json({ timestamp: userResetTimestamp });
+});
+
 // AUTO-RESET CADA 3 HORAS
 const THREE_HOURS = 3 * 60 * 60 * 1000;
 setInterval(() => {
