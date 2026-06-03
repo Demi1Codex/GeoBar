@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>GeoBar - Explorando con OpenStreetMap</title>
+
+    <!-- Meta Tags SEO -->
+    <meta name="description"
+        content="Encuentra los mejores puntos cerca de ti con GeoBar. Desarrollado con OpenStreetMap y React Native." />
+    <meta name="theme-color" content="#1a1c2c" />
+
+    <!-- Google Fonts Premium -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./index.css">
+    <link rel="icon" type="image/png" href="./assets/metal_icon.png">
+</head>
+
+<body>
+    <div id="loading-screen">
+        <div class="logo-container">
+            <div class="logo-text">GEOBAR</div>
+        </div>
+        <div class="loader-bar">
+            <div class="loader-progress"></div>
+        </div>
+    </div>
+
+    <div id="root"></div>
+
+    <script>
+        // Ocurre cuando React Native Web termina de cargar
+        window.addEventListener('load', function () {
+            const loader = document.getElementById('loading-screen');
+            setTimeout(() => {
+                loader.style.opacity = '0';
+                setTimeout(() => {
+                    loader.remove(); // Safer version of loader.style.remove()
+                }, 500);
+            }, 1200);
+        });
+    </script>
+</body>
+
+</html>

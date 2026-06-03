@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "GeoBar",
+    "slug": "GeoBar",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/metal_icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1a1c2c"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.geobar.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#1a1c2c",
+        "foregroundImage": "./assets/metal_icon_final.png",
+        "monochromeImage": "./assets/metal_icon_final.png"
+      }
+    },
+    "web": {
+      "favicon": "./assets/metal_icon_final.png"
+    }
+  }
+}
