@@ -34,3 +34,4 @@
 - Panel de control Python (server_cli.py) con comandos reset, status, bars, connect [COMPLETADO]
 - Comando user-reset en panel Python + endpoint POST /user-reset + GET /user-reset-timestamp [COMPLETADO]
 - App.js: sincronización de userResetTimestamp, limpia @user_votes cuando se ejecuta user-reset [COMPLETADO]
+- Restauración completa de la base de datos de bares desde backups/bars_backup.md (53 bares en toda la RM) [COMPLETADO]
